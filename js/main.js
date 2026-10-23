@@ -66,11 +66,49 @@
       }
     }
   });
+const bgMusic = document.getElementById("bgMusic");
+const birthdaySong = document.getElementById("birthdaySong");
+const birthdayWish = document.getElementById("birthdayWish");
+bgMusic.volume = 0.35;
 
-  document.getElementById("openSurprise").addEventListener("click", () => {
+// Browsers generally require a user interaction
+// before playing audio with sound.
+document.addEventListener("click", function startMusic() {
+  bgMusic.play().catch(() => {});
+}, { once: true });
+
+  document.getElementById("openSurprise").addEventListener("click", async () => {
     burstConfetti(150);
     document.getElementById("memories").scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" });
     for (let i = 0; i < 12; i++) window.setTimeout(createFloatingSymbol, i * 130);
+
+    birthdayWish.hidden = false;
+
+  // Lower background music gradually
+  const fade = setInterval(() => {
+    if (bgMusic.volume > 0.06) {
+      bgMusic.volume = Math.max(0.05, bgMusic.volume - 0.05);
+    } else {
+      clearInterval(fade);
+    }
+  }, 200);
+
+  // Play the birthday song
+  birthdaySong.currentTime = 0;
+
+  try {
+    await birthdaySong.play();
+  } catch (error) {
+    console.log("Birthday song playback failed:", error);
+  }
+
+  // Restore background music when birthday song ends
+  birthdaySong.addEventListener("ended", () => {
+    bgMusic.volume = 0.35;
+    if (bgMusic.paused) {
+      bgMusic.play().catch(() => {});
+    }
+  }, { once: true });
   });
   document.getElementById("celebrate").addEventListener("click", () => {
     burstConfetti(220);
